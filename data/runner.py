@@ -628,6 +628,9 @@ class TaskletContext:
             if tasklet_run["state"] in ["Crashed"]:
                 raise RuntimeError(tasklet_run.get("result", None))
             #
+            if tasklet_run["state"] in ["Failed"]:
+                raise RuntimeError("Tasklet failed")
+            #
             time.sleep(poll_interval)
 
     def fetch_tasklet_logs(self, run_id):
