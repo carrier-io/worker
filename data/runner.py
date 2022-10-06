@@ -37,22 +37,17 @@ import pkg_resources
 import paramiko  # pylint: disable=E0401
 import requests  # pylint: disable=E0401
 
-from pylon.core.tools import log
-from pylon.core.tools import log_loki
-from pylon.core.tools import config
-from pylon.core.tools import module
-from pylon.core.tools import event
-from pylon.core.tools import seed
-from pylon.core.tools import git
-from pylon.core.tools import rpc
-from pylon.core.tools import slot
-from pylon.core.tools import server
-from pylon.core.tools import session
-from pylon.core.tools import traefik
+from pylon.core.tools import log  # pylint: disable=E0401
+from pylon.core.tools import log_loki  # pylint: disable=E0401
+from pylon.core.tools import config  # pylint: disable=E0401
+from pylon.core.tools import module  # pylint: disable=E0401
+from pylon.core.tools import event  # pylint: disable=E0401
+from pylon.core.tools import git  # pylint: disable=E0401
+from pylon.core.tools import rpc  # pylint: disable=E0401
 
-from pylon.core.tools.signal import signal_sigterm
-from pylon.core.tools.context import Context
-from pylon.core.tools.minio.client import MinIOHelper
+from pylon.core.tools.signal import signal_sigterm  # pylint: disable=E0401
+from pylon.core.tools.context import Context  # pylint: disable=E0401
+from pylon.core.tools.minio.client import MinIOHelper  # pylint: disable=E0401
 
 
 def run_tasklet(configuration):
@@ -636,6 +631,18 @@ class TaskletContext:
                 raise RuntimeError("Tasklet failed")
             #
             time.sleep(poll_interval)
+
+    def is_tasklet_running(self, run_id):
+        """ Check if tasklet is running """
+        try:
+            tasklet_run = self.tasklet.pylon_context.rpc_manager.timeout(5).tasklets_get_run(
+                run_id
+            )
+        except:  # pylint: disable=W0702
+            raise
+        return tasklet_run["state"] not in [
+            "Finished", "Crashed", "Failed"
+        ]
 
     def fetch_tasklet_logs(self, run_id):
         """ ... """
