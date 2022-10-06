@@ -262,6 +262,7 @@ class Tasklet:
             #
             module.ModuleManager.activate_path(requirements_path)
             self.module_site_paths.append(requirements_path)
+            pkg_resources._initialize_master_working_set()  # pylint: disable=W0212
         #
         # Install libs
         #
@@ -278,6 +279,7 @@ class Tasklet:
             metadata["module_name"], load_path
         )
         module.ModuleManager.activate_loader(loader)
+        pkg_resources._initialize_master_working_set()  # pylint: disable=W0212
         #
         # Update run state
         #
@@ -377,6 +379,7 @@ class Tasklet:
             #
             module.ModuleManager.activate_path(requirements_path)
             self.module_site_paths.append(requirements_path)
+            pkg_resources._initialize_master_working_set()  # pylint: disable=W0212
         #
         # Install libs
         #
@@ -393,6 +396,7 @@ class Tasklet:
             metadata["module_name"], load_path
         )
         module.ModuleManager.activate_loader(loader)
+        pkg_resources._initialize_master_working_set()  # pylint: disable=W0212
         #
         log.info("Library added: %s", name)
 
