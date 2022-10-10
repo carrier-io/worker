@@ -218,9 +218,20 @@ class Tasklet:
         if "git@" not in self.configuration["tasklet"]["source_url"]:
             source_target["key_data"] = None
         #
-        source = self.source_provider.get_source(source_target)
-        self.temporary_objects.append(source)
-        log.info("Source: %s", source)
+        source = None
+        #
+        for retry in range(5):
+            try:
+                source = self.source_provider.get_source(source_target)
+                self.temporary_objects.append(source)
+                log.info("Source: %s", source)
+                break
+            except:  # pylint: disable=W0702
+                log.exception("Failed to get source at retry %s", retry)
+                time.sleep(5)
+        #
+        if source is None:
+            raise RuntimeError("Failed to get source")
         #
         # Load metadata
         #
@@ -335,9 +346,20 @@ class Tasklet:
         if "git@" not in tasklet_info["source_url"]:
             source_target["key_data"] = None
         #
-        source = self.source_provider.get_source(source_target)
-        self.temporary_objects.append(source)
-        log.info("Library source: %s", source)
+        source = None
+        #
+        for retry in range(5):
+            try:
+                source = self.source_provider.get_source(source_target)
+                self.temporary_objects.append(source)
+                log.info("Library source: %s", source)
+                break
+            except:  # pylint: disable=W0702
+                log.exception("Failed to get library source at retry %s", retry)
+                time.sleep(5)
+        #
+        if source is None:
+            raise RuntimeError("Failed to get library source")
         #
         # Load metadata
         #
