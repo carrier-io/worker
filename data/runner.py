@@ -60,6 +60,13 @@ def run_tasklet(configuration):
         import ssl
         ssl.RAND_bytes(1)
         #
+        this_tasklet_name = configuration["tasklet"]["name"]
+        this_run_id = configuration["runner"]["run_id"]
+        this_title = f"{this_tasklet_name} {this_run_id}"
+        #
+        import setproctitle
+        setproctitle.setproctitle(this_title)
+        #
         tasklet = Tasklet(configuration)
         try:
             tasklet.run()
