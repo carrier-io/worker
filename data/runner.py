@@ -673,53 +673,70 @@ class TaskletContext:
             "Finished", "Crashed", "Failed"
         ]
 
-    def fetch_tasklet_logs(self, run_id):
-        """ ... """
-        result = list()
-        #
-        if "loki" not in self.tasklet.pylon_context.settings:
-            return result
-        #
-        loki_settings = self.tasklet.pylon_context.settings["loki"]
-        #
-        ts_logs_start = 0
-        ts_logs_end = int(time.time() * 1000000000)
-        #
-        loki_auth = None
-        if "user" in loki_settings and "password" in loki_settings:
-            loki_auth = (loki_settings["user"], loki_settings["password"])
-        #
-        loki_query_url = loki_settings["url"]
-        loki_query_url = loki_query_url.replace(
-            "api/v1/push", "api/v1/query_range"
-        )
-        #
-        logs_query = "{" + f'log_type="tasklet",run_id="{run_id}"' + "}"
-        logs_start = ts_logs_start
-        logs_end = ts_logs_end
-        logs_limit = 10000000000
-        #
-        try:
+def fetch_tasklet_logs(self, run_id):
+    """ ... """
+    result = list()
+    #
+    if "loki" not in self.tasklet.pylon_context.settings:
+        return result
+    #
+    loki_settings = self.tasklet.pylon_context.settings["loki"]
+    #
+    ts_logs_start = 0
+    ts_logs_end = int(time.time() * 1000000000)
+    #
+    loki_auth = None
+    if "user" in loki_settings and "password" in loki_settings:
+        loki_auth = (loki_settings["user"], loki_settings["password"])
+    #
+    loki_query_url = loki_settings["url"]
+    loki_query_url = loki_query_url.replace(
+        "api/v1/push", "api/v1/query_range"
+    )
+    #
+    logs_query = "{" + f'log_type="tasklet",run_id="{run_id}"' + "}"
+    logs_start = ts_logs_start
+    logs_end = ts_logs_end
+    logs_limit = 1000
+    #
+    all_log_items = list()
+    #
+    try:
+        while True:
             response = requests.get(
                 loki_query_url,
                 params={
                     "query": logs_query,
-                    # "start": str(logs_start),
-                    # "end": str(logs_end),
-                    # "limit": str(logs_limit),
+                    "start": str(logs_start),
+                    "end": str(logs_end),
+                    "limit": str(logs_limit),
                 },
                 auth=loki_auth,
                 verify=loki_settings.get("verify", False),
             )
             response.raise_for_status()
             response_data = response.json()
+            #
+            log_items = list()
             for response_stream in response_data.get("data", dict).get("result", list()):
                 for response_item in response_stream.get("values", list()):
-                    result.insert(0, response_item[1])
-        except:  # pylint: disable=W0702
-            log.exception("Failed to fetch tasklet logs from Loki")
-        #
-        return result
+                    log_items.append((int(response_item[0]), response_item[1]))
+            log_items.sort(key=lambda data: data[0])
+            #
+            all_log_items.extend(log_items)
+            #
+            if len(log_items) < logs_limit:
+                break
+            #
+            logs_end = log_items[0][0] - 1
+    except:  # pylint: disable=W0702
+        log.exception("Failed to fetch tasklet logs from Loki")
+    #
+    all_log_items.sort(key=lambda data: data[0])
+    for log_item in all_log_items:
+        result.append(log_item[1])
+    #
+    return result
 
     #
     # Compat: subtask
