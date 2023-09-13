@@ -2,8 +2,8 @@ workers: 10
 rabbitmq:
   host: "$RABBIT_HOST"
   port: 5672
-  user: "$RABBITMQ_USER"
-  password: "$RABBITMQ_PASSWORD"
+  user: "$RABBIT_USER"
+  password: "$RABBIT_PASSWORD"
   vhost: "carrier"
   queue: "tasklets-worker"
   all_queue: "tasklets-arbiter-all"
