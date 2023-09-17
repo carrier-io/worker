@@ -52,6 +52,8 @@ class Module(module.ModuleModel):
             vhost=config.get("vhost", "carrier"),
             queue=config.get("queue", "tasklets-worker"),
             all_queue=config.get("all_queue", "tasklets-arbiter-all"),
+            use_ssl=config.get("use_ssl", False),
+            ssl_verify=config.get("ssl_verify", False),
         )
         #
         runner = self.descriptor.loader.get_data("data/runner.py")
