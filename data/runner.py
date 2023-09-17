@@ -176,6 +176,9 @@ class Tasklet:
             self.pylon_context
         )
         # Make RpcManager instance
+        config_rpc_prefix = self.pylon_context.settings["rpc"]["id_prefix"]
+        worker_rpc_prefix = f'{config_rpc_prefix}{self.pylon_context.node_name}_'
+        self.pylon_context.settings["rpc"]["id_prefix"] = worker_rpc_prefix
         self.pylon_context.rpc_manager = rpc.RpcManager(self.pylon_context)
         # Apply patches needed for pure-python git and providers
         # git.apply_patches()
